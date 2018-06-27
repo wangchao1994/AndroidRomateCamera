@@ -19,8 +19,10 @@ import android.widget.Toast;
 
 import com.android.librarycamera.R;
 import com.android.librarycamera.materialcamera.ICallback;
+import com.android.librarycamera.materialcamera.socket.SendBitmapThread;
 import com.android.librarycamera.materialcamera.util.CameraUtil;
 import com.android.librarycamera.materialcamera.util.Degrees;
+import com.android.librarycamera.materialcamera.util.IPGet;
 import com.android.librarycamera.materialcamera.util.ImageUtil;
 import com.android.librarycamera.materialcamera.util.ManufacturerUtil;
 
@@ -543,6 +545,17 @@ public class CameraFragment extends BaseCameraFragment implements View.OnClickLi
         new Camera.PictureCallback() {
           public void onPictureTaken(final byte[] data, Camera camera) {
             //Log.d(TAG, "onPictureTaken - jpeg, size: " + data.length);
+            Log.d("wchao pic data","data.length="+data.length);
+            /*
+            * 执行拍照动作
+            * 从云端向客户端进行数据的发送
+            * **/
+            ArrayList<String> connectedIP = IPGet.getConnectedIP();
+            for (String ip : connectedIP) {
+              if (ip.contains(".")) {
+                new SendBitmapThread(ip, data).start();
+              }
+            }
             final File outputPic = getOutputPictureFile();
             // lets save the image to disk
             ImageUtil.saveToDiskAsync(
